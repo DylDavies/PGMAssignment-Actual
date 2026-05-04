@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import KBinsDiscretizer, StandardScaler
+from typing import Literal
 
 import config
 
@@ -46,3 +47,26 @@ def apply_scaler(
     scaler: StandardScaler
 ) -> None:
     df[continuous_cols] = scaler.transform(df[continuous_cols])
+
+def discretise(
+    df: pd.DataFrame,
+    n_bins: int = config.N_BINS,
+    strategy: Literal['uniform', 'quantile', 'kmeans'] = config.DISCRETISE_STRATEGY
+) -> KBinsDiscretizer:
+    disc = KBinsDiscretizer(
+        n_bins=n_bins, encode="ordinal", strategy=strategy, subsample=None
+    )
+
+    df[continuous_cols] = disc.fit_transform(df[continuous_cols]).astype(int)
+
+    return disc
+
+def apply_discretiser(
+    df: pd.DataFrame,
+    disc: KBinsDiscretizer,
+) -> pd.DataFrame:
+    for col, edges in zip(continuous_cols, disc.bin_edges_):
+        lo, hi = edges[0], edges[-1]
+        df[col] = df[col].clip(lower=lo, upper=hi)
+    df[continuous_cols] = disc.transform(df[continuous_cols]).astype(int)
+    return df

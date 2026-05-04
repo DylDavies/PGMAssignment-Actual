@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Literal
 
 RANDOM_SEED = 2026
 
@@ -52,3 +53,6 @@ CONTINUOUS: dict[str, list[str]] = {
     stage: [s for s in sensors if s not in DISCRETE.get(stage, [])]
     for stage, sensors in STAGE_SENSORS.items()
 }
+
+N_BINS = 4
+DISCRETISE_STRATEGY: Literal['uniform', 'quantile', 'kmeans'] = "quantile"

@@ -3,7 +3,8 @@ from pathlib import Path
 
 from config import ROOT_DIR
 from helpers.data_helper import download_dataset, load_merged, split_train_test
-from helpers.preprocessing_helper import impute, apply_imputer, scale, apply_scaler
+from helpers.preprocessing_helper import impute, apply_imputer, scale, apply_scaler, discretise, apply_discretiser
+from helpers.structure_learning_helper import learn_all_structures
 
 import config
 
@@ -29,3 +30,11 @@ apply_imputer(test_df, continuous_imputer, discrete_imputer)
 scaler = scale(normal_train)
 apply_scaler(train_df, scaler)
 apply_scaler(test_df, scaler)
+
+# Discretise
+discretiser = discretise(normal_train)
+apply_discretiser(train_df, discretiser)
+apply_discretiser(test_df, discretiser)
+
+# Structure Learning
+learn_all_structures(normal_train)
