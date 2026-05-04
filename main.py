@@ -23,7 +23,9 @@ print(f"Test : {len(test_df):,}")
 # Impute
 continuous_imputer, discrete_imputer = impute(normal_train)
 apply_imputer(train_df, continuous_imputer, discrete_imputer)
+apply_imputer(test_df, continuous_imputer, discrete_imputer)
 
 # Scale continuous values to be between 0 and 1
-scaler = scale(train_df)
+scaler = scale(normal_train)
+apply_scaler(train_df, scaler)
 apply_scaler(test_df, scaler)
