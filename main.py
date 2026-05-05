@@ -3,8 +3,9 @@ from pathlib import Path
 
 from config import ROOT_DIR
 from helpers.data_helper import download_dataset, load_merged, split_train_test
-from helpers.preprocessing_helper import impute, apply_imputer, scale, apply_scaler, discretise, apply_discretiser
+from helpers.preprocessing_helper import impute, apply_imputer, scale, apply_scaler, discretise, apply_discretiser, coerce_discrete
 from helpers.structure_learning_helper import learn_all_structures
+from helpers.parameter_learning_helper import build_emission_models, learn_transition_matrix
 
 import config
 
@@ -27,14 +28,24 @@ apply_imputer(train_df, continuous_imputer, discrete_imputer)
 apply_imputer(test_df, continuous_imputer, discrete_imputer)
 
 # Scale continuous values to be between 0 and 1
-scaler = scale(normal_train)
-apply_scaler(train_df, scaler)
-apply_scaler(test_df, scaler)
+# scaler = scale(normal_train)
+# apply_scaler(train_df, scaler)
+# apply_scaler(test_df, scaler)
 
 # Discretise
-discretiser = discretise(normal_train)
-apply_discretiser(train_df, discretiser)
-apply_discretiser(test_df, discretiser)
+discretiser, dropped_cols = discretise(normal_train)
+apply_discretiser(train_df, discretiser, dropped_cols)
+apply_discretiser(test_df, discretiser, dropped_cols)
+
+coerce_discrete(normal_train)
+coerce_discrete(train_df)
+coerce_discrete(test_df)
 
 # Structure Learning
-learn_all_structures(normal_train)
+learned_networks = learn_all_structures(normal_train)
+
+# Build the Emission Models (P(Sensors_t | State_t))
+emission_models = build_emission_models(train_df, learned_networks)
+
+# Build the Transition Model (P(State_t | State_t-1))
+transition_matrix = learn_transition_matrix(train_df)
