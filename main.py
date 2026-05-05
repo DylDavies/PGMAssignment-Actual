@@ -46,10 +46,5 @@ transition_matrix = learn_transition_matrix(train_df)
 # Testing
 results = run_hmm_inference(test_df, emission_models, transition_matrix, train_df)
 
-# Let's peek at the detected attacks!
-print("\n--- Detection Summary ---")
-for stage in config.STAGE_SENSORS.keys():
-    attacks_found = (results[f"{stage}_Prediction"] == config.ATTACK_LABEL).sum()
-    print(f"{stage} flagged {attacks_found:,} anomalous timesteps.")
-
+# Evaluation
 evaluate_system(results, test_df)
