@@ -34,20 +34,6 @@ def apply_imputer(
     df[continuous_cols] = continuous_imputer.transform(df[continuous_cols]) # type: ignore
     df[discrete_cols] = discrete_imputer.transform(df[discrete_cols]) # type: ignore
 
-def scale(
-    df: pd.DataFrame
-) -> StandardScaler:
-    sc = StandardScaler()
-    df[continuous_cols] = sc.fit_transform(df[continuous_cols])
-
-    return sc
-
-def apply_scaler(
-    df: pd.DataFrame,
-    scaler: StandardScaler
-) -> None:
-    df[continuous_cols] = scaler.transform(df[continuous_cols])
-
 def discretise(
     df: pd.DataFrame,
     n_bins: int = config.N_BINS,

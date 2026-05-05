@@ -5,7 +5,11 @@ from pgmpy.estimators import BayesianEstimator
 import config
 import matplotlib.pyplot as plt
 import networkx as nx
+from joblib import Memory
 
+memory = Memory(location=str(config.CACHE_DIR), verbose=0)
+
+@memory.cache
 def build_emission_models(
     train_df: pd.DataFrame, 
     learned_dags: dict[str, BayesianNetwork]
@@ -39,13 +43,17 @@ def build_emission_models(
         # Prepare the training data (rename the label column to match our node)
         stage_df = train_df[sensors + [config.LABEL_COL]].copy()
         stage_df.rename(columns={config.LABEL_COL: 'State'}, inplace=True)
+
+        all_states: dict[str, list[int | str]] = {sensor: list(range(config.N_BINS)) for sensor in sensors}
+        all_states['State'] = [config.NORMAL_LABEL, config.ATTACK_LABEL]
         
         # Fit using Bayesian Estimation to prevent 0.0 probabilities on rare attacks
         bn.fit(
             stage_df, 
             estimator=BayesianEstimator, 
             prior_type="BDeu", 
-            equivalent_sample_size=10
+            equivalent_sample_size=10,
+            state_names=all_states
         )
         
         emission_models[stage] = bn
