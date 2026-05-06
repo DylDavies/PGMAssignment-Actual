@@ -62,8 +62,9 @@ def learn_all_structures(df_normal_disc: pd.DataFrame) -> dict[str, BayesianNetw
         
         ax.set_title(f"Learned DAG: {stage}\n({len(edges)} edges)", fontsize=11)
         ax.axis("off")
+        ax.margins(0.2)
 
-    # plt.tight_layout()
+    plt.tight_layout()
     plt.savefig(config.OUTPUT_DIR / "BNPlots.png")
     
     return learned_networks

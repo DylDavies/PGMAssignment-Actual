@@ -49,7 +49,7 @@ transition_matrix = learn_transition_matrix(train_df)
 # Testing
 hmm_start = perf_counter()
 print("Running HMM Inference...")
-results = run_hmm_inference(test_df, emission_models, transition_matrix, train_df)
+hmm_results = run_hmm_inference(test_df, emission_models, transition_matrix, train_df)
 hmm_end = perf_counter()
 
 print(f"HMM Inference Execution Time: {(hmm_end - hmm_start):.4f}")
@@ -62,6 +62,6 @@ generative_end = perf_counter()
 print(f"Generative Inference Execution Time: {(generative_start - generative_end):.4f}")
 
 # Evaluation
-evaluate_system(results, test_df)
+evaluate_system(hmm_results, test_df, "confusion_matrix_hmm")
 print("\n--- Generative Baseline Evaluation ---")
-evaluate_system(generative_results, test_df)
+evaluate_system(generative_results, test_df, "confusion_matrix_generative")

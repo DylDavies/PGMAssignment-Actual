@@ -39,6 +39,7 @@ def build_emission_models(
         
         ax.set_title(f"Learned DAG: {stage}", fontsize=11)
         ax.axis("off")
+        ax.margins(0.2)
         
         # Prepare the training data (rename the label column to match our node)
         stage_df = train_df[sensors + [config.LABEL_COL]].copy()
@@ -58,6 +59,7 @@ def build_emission_models(
         
         emission_models[stage] = bn
 
+    plt.tight_layout()
     plt.savefig(config.OUTPUT_DIR / "EMPlots.png")
 
     return emission_models

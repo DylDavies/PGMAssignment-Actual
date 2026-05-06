@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from sklearn.metrics import classification_report, confusion_matrix, f1_score
 import config
 
-def evaluate_system(results_df: pd.DataFrame, test_df: pd.DataFrame) -> None:
+def evaluate_system(results_df: pd.DataFrame, test_df: pd.DataFrame, confusion_file: str = "confusion_matrix.png") -> None:
     print("\n--- Final Model Evaluation ---")
     
     # Aggregate Predictions (Logical OR across all stages)
@@ -44,8 +44,8 @@ def evaluate_system(results_df: pd.DataFrame, test_df: pd.DataFrame) -> None:
     plt.ylabel('True State')
     plt.xlabel('Predicted State')
     plt.tight_layout()
-    plt.savefig(config.OUTPUT_DIR / "confusion_matrix.png", dpi=150)
-    print(f"\nConfusion matrix saved to {config.OUTPUT_DIR / 'confusion_matrix.png'}")
+    plt.savefig(config.OUTPUT_DIR / confusion_file, dpi=150)
+    print(f"\nConfusion matrix saved to {config.OUTPUT_DIR / confusion_file}")
     
     # Final F1 Score Printout
     f1 = f1_score(y_true, y_pred, pos_label=config.ATTACK_LABEL)
