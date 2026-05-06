@@ -13,40 +13,23 @@ def run_hmm_inference(
     transition_matrix: dict[str, dict[str, float]],
     train_df: pd.DataFrame
 ) -> pd.DataFrame:
-    """
-    Runs the Forward Algorithm using vectorized BN predictions to calculate 
-    the probability of an attack at each timestep.
-    """
-    print("\n--- Starting HMM Inference ---")
-    
-    # 1. Calculate static priors from training data to isolate the emission probabilities
     p_train_normal = (train_df[config.LABEL_COL] == config.NORMAL_LABEL).mean()
     p_train_attack = (train_df[config.LABEL_COL] == config.ATTACK_LABEL).mean()
-    print(f"Static Priors - Normal: {p_train_normal:.4f}, Attack: {p_train_attack:.4f}")
 
-    # We will store the final belief predictions here
     results_df = pd.DataFrame(index=test_df.index)
     
     for stage, bn in emission_models.items():
-        print(f"\nRunning vectorized emission inference for {stage}...")
-        
-        # Isolate the sensors used in this specific stage's DAG
+        print(f"Starting {stage}...")
         sensors = [node for node in bn.nodes() if node != 'State']
         
-        # 1. Vectorized Static Inference
-        # predict_probability is highly optimized and returns a DataFrame of state probabilities
         static_probs = bn.predict_probability(test_df[sensors])
         
-        # pgmpy formats column names as "Node_Value"
         col_normal = f"State_{config.NORMAL_LABEL}"
         col_attack = f"State_{config.ATTACK_LABEL}"
         
-        # 2. Isolate Emission Likelihoods: P(Sensors | State) ∝ P(State | Sensors) / P(State)
         emission_normal = static_probs[col_normal].values / p_train_normal # type: ignore
         emission_attack = static_probs[col_attack].values / p_train_attack # type: ignore
         
-        # 3. The Forward Algorithm Loop
-        print(f"Applying temporal transition matrix for {stage}...")
         n_steps = len(test_df)
         belief_normal = np.zeros(n_steps)
         belief_attack = np.zeros(n_steps)

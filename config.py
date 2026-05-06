@@ -56,3 +56,5 @@ CONTINUOUS: dict[str, list[str]] = {
 
 N_BINS = 4
 DISCRETISE_STRATEGY: Literal['uniform', 'quantile', 'kmeans'] = "uniform"
+
+THRESHOLD_PERC = 1

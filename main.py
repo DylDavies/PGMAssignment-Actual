@@ -1,9 +1,12 @@
+from time import perf_counter
+
 from helpers.data_helper import download_dataset, load_merged, split_train_test
 from helpers.preprocessing_helper import impute, apply_imputer, discretise, apply_discretiser, coerce_discrete
 from helpers.structure_learning_helper import learn_all_structures
 from helpers.parameter_learning_helper import build_emission_models, learn_transition_matrix
-from helpers.inference_helper import run_hmm_inference
+from helpers.hmm_inference_helper import run_hmm_inference
 from helpers.evaluation_helper import evaluate_system
+from helpers.generative_inference_helper import run_generative_inference
 
 import config
 
@@ -44,7 +47,21 @@ emission_models = build_emission_models(train_df, learned_networks)
 transition_matrix = learn_transition_matrix(train_df)
 
 # Testing
+hmm_start = perf_counter()
+print("Running HMM Inference...")
 results = run_hmm_inference(test_df, emission_models, transition_matrix, train_df)
+hmm_end = perf_counter()
+
+print(f"HMM Inference Execution Time: {(hmm_end - hmm_start):.4f}")
+
+generative_start = perf_counter()
+print("Running Generative Inference...")
+generative_results = run_generative_inference(normal_train, test_df, learned_networks)
+generative_end = perf_counter()
+
+print(f"Generative Inference Execution Time: {(generative_start - generative_end):.4f}")
 
 # Evaluation
 evaluate_system(results, test_df)
+print("\n--- Generative Baseline Evaluation ---")
+evaluate_system(generative_results, test_df)
