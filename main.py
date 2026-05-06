@@ -59,9 +59,10 @@ print("Running Generative Inference...")
 generative_results = run_generative_inference(normal_train, test_df, learned_networks)
 generative_end = perf_counter()
 
-print(f"Generative Inference Execution Time: {(generative_start - generative_end):.4f}")
+print(f"Generative Inference Execution Time: {(generative_end - generative_start):.4f}")
 
 # Evaluation
+print("\n--- HMM Evaluation ---")
 evaluate_system(hmm_results, test_df, "confusion_matrix_hmm")
-print("\n--- Generative Baseline Evaluation ---")
+print("\n--- Generative Evaluation ---")
 evaluate_system(generative_results, test_df, "confusion_matrix_generative")
