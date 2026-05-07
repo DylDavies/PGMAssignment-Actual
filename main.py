@@ -1,10 +1,11 @@
 from time import perf_counter
+import pandas as pd
 
 from helpers.data_helper import download_dataset, load_merged, split_train_test
 from helpers.preprocessing_helper import impute, apply_imputer, discretise, apply_discretiser, coerce_discrete
 from helpers.structure_learning_helper import learn_all_structures
 from helpers.parameter_learning_helper import build_emission_models, learn_transition_matrix
-from helpers.hmm_inference_helper import run_hmm_inference
+from helpers.shmm_inference_helper import run_hmm_inference
 from helpers.evaluation_helper import evaluate_system
 from helpers.generative_inference_helper import run_generative_inference
 
@@ -37,32 +38,41 @@ coerce_discrete(normal_train)
 coerce_discrete(train_df)
 coerce_discrete(test_df)
 
-# Structure Learning
-learned_networks = learn_all_structures(normal_train)
+shmm_results: pd.DataFrame | None = None
+generative_results: pd.DataFrame | None = None
 
-# Build the Emission Models (P(Sensors_t | State_t))
-emission_models = build_emission_models(train_df, learned_networks)
+if 'goc' in config.MODELS_TO_RUN or 'shmm' in config.MODELS_TO_RUN:
+    # Structure Learning
+    learned_networks = learn_all_structures(normal_train)
 
-# Build the Transition Model (P(State_t | State_t-1))
-transition_matrix = learn_transition_matrix(train_df)
+    if 'shmm' in config.MODELS_TO_RUN:
+        # Build the Emission Models (P(Sensors_t | State_t))
+        emission_models = build_emission_models(train_df, learned_networks)
 
-# Testing
-hmm_start = perf_counter()
-print("Running HMM Inference...")
-hmm_results = run_hmm_inference(test_df, emission_models, transition_matrix, train_df)
-hmm_end = perf_counter()
+        # Build the Transition Model (P(State_t | State_t-1))
+        transition_matrix = learn_transition_matrix(train_df)
 
-print(f"HMM Inference Execution Time: {(hmm_end - hmm_start):.4f}")
+        # Testing
+        shmm_start = perf_counter()
+        print("Running HMM Inference...")
+        shmm_results = run_hmm_inference(test_df, emission_models, transition_matrix, train_df)
+        shmm_end = perf_counter()
 
-generative_start = perf_counter()
-print("Running Generative Inference...")
-generative_results = run_generative_inference(normal_train, test_df, learned_networks)
-generative_end = perf_counter()
+        print(f"HMM Inference Execution Time: {(shmm_end - shmm_start):.4f}")
 
-print(f"Generative Inference Execution Time: {(generative_end - generative_start):.4f}")
+    generative_start = perf_counter()
+    print("Running Generative Inference...")
+    generative_results = run_generative_inference(normal_train, test_df, learned_networks)
+    generative_end = perf_counter()
+
+    print(f"Generative Inference Execution Time: {(generative_end - generative_start):.4f}")
 
 # Evaluation
-print("\n--- HMM Evaluation ---")
-evaluate_system(hmm_results, test_df, "confusion_matrix_hmm")
-print("\n--- Generative Evaluation ---")
-evaluate_system(generative_results, test_df, "confusion_matrix_generative")
+
+if shmm_results is not None:
+    print("\n--- SHMM Evaluation ---")
+    evaluate_system(shmm_results, test_df, "confusion_matrix_hmm")
+
+if generative_results is not None:
+    print("\n--- Generative Evaluation ---")
+    evaluate_system(generative_results, test_df, "confusion_matrix_generative")
