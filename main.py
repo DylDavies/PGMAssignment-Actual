@@ -5,9 +5,10 @@ from helpers.data_helper import download_dataset, load_merged, split_train_test
 from helpers.preprocessing_helper import impute, apply_imputer, discretise, apply_discretiser, coerce_discrete
 from helpers.structure_learning_helper import learn_all_structures
 from helpers.parameter_learning_helper import build_emission_models, learn_transition_matrix
-from helpers.shmm_inference_helper import run_hmm_inference
+from helpers.shmm_inference_helper import run_shmm_inference
 from helpers.evaluation_helper import evaluate_system
 from helpers.generative_inference_helper import run_generative_inference
+from helpers.hmm_inference_helper import run_hmm_inference
 
 import config
 
@@ -40,8 +41,12 @@ coerce_discrete(test_df)
 
 shmm_results: pd.DataFrame | None = None
 generative_results: pd.DataFrame | None = None
+hmm_results: pd.DataFrame | None = None
 
 if 'goc' in config.MODELS_TO_RUN or 'shmm' in config.MODELS_TO_RUN:
+    shmm_start = perf_counter()
+    generative_start = perf_counter()
+
     # Structure Learning
     learned_networks = learn_all_structures(normal_train)
 
@@ -53,26 +58,36 @@ if 'goc' in config.MODELS_TO_RUN or 'shmm' in config.MODELS_TO_RUN:
         transition_matrix = learn_transition_matrix(train_df)
 
         # Testing
-        shmm_start = perf_counter()
-        print("Running HMM Inference...")
-        shmm_results = run_hmm_inference(test_df, emission_models, transition_matrix, train_df)
+        print("Running SHMM Inference...")
+        shmm_results = run_shmm_inference(test_df, emission_models, transition_matrix, train_df)
         shmm_end = perf_counter()
 
-        print(f"HMM Inference Execution Time: {(shmm_end - shmm_start):.4f}")
+        print(f"SHMM Inference Execution Time: {(shmm_end - shmm_start):.4f}")
 
-    generative_start = perf_counter()
     print("Running Generative Inference...")
     generative_results = run_generative_inference(normal_train, test_df, learned_networks)
     generative_end = perf_counter()
 
-    print(f"Generative Inference Execution Time: {(generative_end - generative_start):.4f}")
+    print(f"Generative Inference Execution Time: {(generative_end - generative_start):.4f}") # this will only be accurage if shmm does not run due to code structure
+
+if 'hmm' in config.MODELS_TO_RUN:
+    hmm_start = perf_counter()
+    print("Running HMM Inference...")
+    hmm_results = run_hmm_inference(normal_train, test_df)
+    hmm_end = perf_counter()
+
+    print(f"HMM Inference Execution Time: {(hmm_end - hmm_start):.4f}")
 
 # Evaluation
 
 if shmm_results is not None:
     print("\n--- SHMM Evaluation ---")
-    evaluate_system(shmm_results, test_df, "confusion_matrix_hmm")
+    evaluate_system(shmm_results, test_df, "confusion_matrix_shmm")
 
 if generative_results is not None:
     print("\n--- Generative Evaluation ---")
     evaluate_system(generative_results, test_df, "confusion_matrix_generative")
+
+if hmm_results is not None:
+    print("\n--- HMM Evaluation ---")
+    evaluate_system(hmm_results, test_df, "confusion_matrix_hmm")

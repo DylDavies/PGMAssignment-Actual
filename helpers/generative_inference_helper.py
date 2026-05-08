@@ -8,7 +8,7 @@ def run_generative_inference(
     normal_train_df: pd.DataFrame, 
     test_df: pd.DataFrame, 
     learned_dags: dict[str, BayesianNetwork],
-    threshold_perc: int = config.THRESHOLD_PERC
+    threshold_perc: float = config.THRESHOLD_PERC
 ) -> pd.DataFrame:
     results_df = pd.DataFrame(index=test_df.index)
     

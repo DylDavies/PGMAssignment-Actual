@@ -7,7 +7,7 @@ import config
 memory = Memory(location=str(config.CACHE_DIR), verbose=0)
 
 @memory.cache
-def run_hmm_inference(
+def run_shmm_inference(
     test_df: pd.DataFrame, 
     emission_models: dict[str, BayesianNetwork],
     transition_matrix: dict[str, dict[str, float]],
