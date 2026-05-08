@@ -122,7 +122,7 @@ evaluation         →  Per-class precision, recall, F1; confusion matrix plots
 
 ## Expected Runtimes
 
-Approximate training times on a standard laptop (as reported in Table IV):
+Approximate training times on a mid level PC - Ryzen 5 3600, 16GB RAM (as reported in Table IV):
 
 | Model | Approx. Training Time |
 |---|---|
