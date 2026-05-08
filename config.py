@@ -58,3 +58,9 @@ N_BINS = 4
 DISCRETISE_STRATEGY: Literal['uniform', 'quantile', 'kmeans'] = "uniform"
 
 THRESHOLD_PERC = 1
+
+N_COMPONENTS   = 3
+N_ITER         = 150
+TOL            = 1e-4
+
+MODELS_TO_RUN: list[Literal['shmm', 'goc', 'hmm']] = ['goc']
